@@ -30,7 +30,7 @@ class ImageConverter:
         except CvBridgeError as e:
             print(e)
 
-    def callback(self, data):
+    def callback_rgb(self, data):
         try:
             # Read rgb image.
             self.cv_image_rgb = self.bridge.imgmsg_to_cv2(data, "bgr8")
