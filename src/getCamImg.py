@@ -5,7 +5,7 @@ import math
 import cv2
 import numpy as np
 from std_msgs.msg import String, Float32
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, PointCloud2
 from cv_bridge import CvBridge, CvBridgeError
 
 # This script listens /zed/zed_node/depth/depth_registered
@@ -16,16 +16,18 @@ class ImageConverter:
     def __init__(self):
         # Initialize depth image listener and average distance publisher.
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/zed/zed_node/depth/depth_registered", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/zed/zed_node/depth/depth_registered", Image, self.callback_depth)
         self.rgb_sub = rospy.Subscriber("/zed/zed_node/rgb/image_raw_color", Image, self.callback_rgb)
-        self.cv_image = []
+        self.pc_sub = rospy.Subscriber("/zed/zed_node/point_cloud/cloud_registered", PointCloud2, self.callback_pc)
+        self.depth_image = []
         self.cv_image_rgb = []
+        self.pointcloud = PointCloud2()
         self.callback_received = False
 
-    def callback(self, data):
+    def callback_depth(self, data):
         try:
             # Read depth image.
-            self.cv_image = self.bridge.imgmsg_to_cv2(data, "32FC1")
+            self.depth_image = self.bridge.imgmsg_to_cv2(data, "32FC1")
             self.callback_received = True
         except CvBridgeError as e:
             print(e)
@@ -38,19 +40,19 @@ class ImageConverter:
         except CvBridgeError as e:
             print(e)
 
+    def callback_pc(self, data):
+        
+        self.pointcloud = data
+
 
     def get_depth(self):
-        height, width = self.cv_image.shape
+        height, width = self.depth_image.shape
 
         h_new = height * 0.3
         w_new = width * 0.3
 
-        # Resize image to process faster.
-        resized = cv2.resize(self.cv_image, (int(w_new), int(h_new)), interpolation=cv2.INTER_AREA)
-
         # Show images.
-        cv2.imshow('Resized Image', resized)
-        cv2.imshow('Thresholded Image', th)
+        cv2.imshow('depth image', self.depth_image)
         cv2.waitKey(1)
 
 
