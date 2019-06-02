@@ -1,2 +1,3 @@
-# scooping_cv
-SS19 Computer Vision - See the Icecream
+# scooping_cv - deprecated
+
+this repository moved to https://github.com/Roboy/gelataio-boy
